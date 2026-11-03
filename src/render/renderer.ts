@@ -1,8 +1,11 @@
 import { restorationLevel } from "../game/economy";
 import type { GameState } from "../game/state";
+import { rps } from "../game/economy";
 import { css, hex, mix } from "./color";
 import { currentPhase, lightAt, type Light } from "./daynight";
 import { makeLayout, type PondLayout } from "./layout";
+import { PondLife, type Pointer } from "./life";
+import { Effects } from "./particles";
 import { fitViewport, sizeCanvas, type Viewport } from "./pixels";
 import { hash2 } from "./rng";
 import { drawBackground, drawDeck, drawFallenStones, drawRim, type Look } from "./scene";
@@ -21,6 +24,10 @@ export class Renderer {
   private rim = document.createElement("canvas");
   private lookKey = "";
   private clarity = -1;
+  private ambient = 0;
+  readonly fx = new Effects();
+  life!: PondLife;
+  pointer: Pointer = { x: -100, y: -100, idle: 0, over: false };
   phaseOverride: number | null = null;
 
   constructor(private canvas: HTMLCanvasElement) {}
@@ -30,6 +37,8 @@ export class Renderer {
     this.ctx = sizeCanvas(this.canvas, this.vp);
     this.layout = makeLayout(this.vp.W, this.vp.H);
     this.water = new Water(this.layout);
+    if (this.life) this.life.setLayout(this.layout);
+    else this.life = new PondLife(this.layout, this.fx);
     this.lookKey = "";
   }
 
@@ -70,13 +79,42 @@ export class Renderer {
     });
     ctx.drawImage(this.water.canvas, 0, 0);
 
+    // The pond's earnings, made visible: rings appear faster as ripples/s grows.
+    this.ambient += dt * Math.min(4, Math.log10(rps(state) + 1) * 0.5);
+    while (this.ambient > 1) {
+      this.ambient -= 1;
+      const x = L.cx + (Math.random() * 2 - 1) * L.rx;
+      const y = L.cy + (Math.random() * 2 - 1) * L.ry;
+      if (L.depth(x, y) > 0.1) this.fx.ripple(x, y, 5 + Math.random() * 6, 0.6, 8);
+    }
+
+    this.life.sync(state);
+    this.life.update(dt, this.pointer, state.golden.timeLeft);
+    this.fx.update(dt);
+    this.life.drawUnder(ctx, this.clarity, time);
     if (level < 2) drawAlgae(ctx, L, time);
     if (level < 1) drawTrash(ctx, L, time);
     drawFallenStones(ctx, L, level);
+    this.fx.draw(ctx);
+    this.life.drawSurface(ctx, time);
     ctx.drawImage(this.rim, 0, 0);
     if (level >= 12) drawDeck(ctx, L);
+    this.life.drawBank(ctx, time, light);
 
     this.drawLight(light, level >= 9, time);
+    this.life.drawGlow(ctx, time, light, level >= 5 || state.producers.reeds > 0);
+  }
+
+  // A click on the canvas: ripples and fed koi if it lands in the water.
+  // Returns true if it hit the golden koi instead.
+  clickAt(x: number, y: number): "golden" | "water" | "land" {
+    if (this.life.hitGolden(x, y)) return "golden";
+    if (this.layout.depth(x, y) > 0.02) {
+      this.fx.splash(x, y, 0.7);
+      this.life.feed(x, y);
+      return "water";
+    }
+    return "land";
   }
 
   private drawLight(light: Light, clearSky: boolean, time: number): void {
