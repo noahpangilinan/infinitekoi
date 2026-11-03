@@ -1,1 +1,41 @@
-html, body { margin: 0; height: 100%; background: #10151a; }
+:root {
+  --panel: 360px;
+  --ink: #f4ecd8;
+  --ink-dim: #b9b09a;
+  --wood: #3b2a1e;
+  --wood-dark: #24190f;
+  --wood-light: #5a4130;
+  --gold: #f2c14e;
+  --jade: #6fc9a8;
+  --bad: #c9564a;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0f1418;
+  color: var(--ink);
+  font-family: "Pixelify Sans", monospace;
+  -webkit-font-smoothing: none;
+  user-select: none;
+}
+
+#pond {
+  position: fixed;
+  left: 0;
+  top: 0;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  cursor: pointer;
+}
+
+#ui {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--panel);
+  background: var(--wood);
+}
