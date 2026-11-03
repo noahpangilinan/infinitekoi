@@ -598,3 +598,25 @@ button.gold {
   background: #8e6a19;
   color: #fff3c4;
 }
+
+#hint {
+  position: fixed;
+  transform: translate(-50%, -100%);
+  padding: 6px 12px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  display: none;
+  animation: bob 1.4s steps(4) infinite;
+}
+
+#hint.shown {
+  display: block;
+}
+
+@keyframes bob {
+  50% {
+    transform: translate(-50%, calc(-100% - 4px));
+  }
+}

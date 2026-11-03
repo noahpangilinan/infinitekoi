@@ -107,8 +107,17 @@ const panel = new Panel(document.getElementById("ui")!, state, {
   },
 });
 
+// A nudge for brand-new ponds, gone after the first click.
+const hint = document.createElement("div");
+hint.id = "hint";
+hint.textContent = "Click the water to make ripples";
+document.body.append(hint);
+
 function resize(): void {
   renderer.resize(Math.max(200, window.innerWidth - PANEL_WIDTH), window.innerHeight);
+  const L = renderer.layout;
+  hint.style.left = `${L.cx * renderer.vp.scale}px`;
+  hint.style.top = `${(L.cy - L.ry - 14) * renderer.vp.scale}px`;
 }
 window.addEventListener("resize", resize);
 resize();
@@ -168,6 +177,7 @@ function loop(now: number): void {
   renderer.frame(state, time, dt);
   if (slow > 0.1) {
     panel.update(slow);
+    hint.classList.toggle("shown", state.clicks === 0 && !debug);
     const earned = checkAchievements(state);
     if (earned.length > 3) {
       toast(`${earned.length} achievements earned`, `+${earned.length}% production. See the Feats tab.`);
