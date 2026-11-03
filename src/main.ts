@@ -52,6 +52,9 @@ function save(): void {
 const canvas = document.getElementById("pond") as HTMLCanvasElement;
 const renderer = new Renderer(canvas);
 if (params.has("t")) renderer.phaseOverride = Number(params.get("t"));
+if (debug && params.has("rain")) renderer.rainOverride = Number(params.get("rain"));
+if (debug && params.has("ascend")) renderer.ascensionFreeze = Number(params.get("ascend"));
+if (debug && params.has("theme")) state.theme = params.get("theme")!;
 
 const panel = new Panel(document.getElementById("ui")!, state, {
   bought(id, result) {
@@ -67,12 +70,16 @@ const panel = new Panel(document.getElementById("ui")!, state, {
     if (u?.restoreStage) toast(u.name, "The pond looks better already.", icon(u.icon));
   },
   ascend() {
-    const gained = ascend(state);
-    if (gained > 0) {
-      toast("Through the Dragon Gate", `A koi became a dragon. +${gained} Dragon Scale${gained === 1 ? "" : "s"}.`, icon("golden"), "gold");
-      panel.setState(state);
-      save();
-    }
+    if (renderer.ascending) return;
+    // The pond resets at the flash, halfway through the scene.
+    renderer.ascend(() => {
+      const gained = ascend(state);
+      if (gained > 0) {
+        toast("Through the Dragon Gate", `A koi became a dragon. +${gained} Dragon Scale${gained === 1 ? "" : "s"}.`, icon("golden"), "gold");
+        panel.setState(state);
+        save();
+      }
+    });
   },
   save() {
     save();
