@@ -25,7 +25,8 @@ body {
   overflow: hidden;
   background: #0f1418;
   color: var(--ink);
-  font-family: "Pixelify Sans", monospace;
+  font-family: "Tiny5", monospace;
+  font-synthesis: none; /* no fake bold: it smears pixel fonts */
   font-size: 16px;
   -webkit-font-smoothing: none;
   user-select: none;
@@ -63,7 +64,7 @@ body {
 }
 
 #ui .title {
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -156,7 +157,7 @@ button:disabled {
 }
 
 .small {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-dim);
   line-height: 1.35;
 }
@@ -175,7 +176,7 @@ button:disabled {
 
 .amounts button {
   padding: 3px 8px;
-  font-size: 13px;
+  font-size: 14px;
   background: var(--wood);
 }
 
@@ -273,7 +274,7 @@ button:disabled {
 }
 
 .prod .cost {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .prod .cost::before {
@@ -315,7 +316,7 @@ button:disabled {
 }
 
 .card .name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -395,7 +396,7 @@ button:disabled {
 
 .node span {
   grid-column: 1;
-  font-size: 13px;
+  font-size: 14px;
   color: #b8c4dc;
 }
 
@@ -405,7 +406,7 @@ button:disabled {
   align-self: center;
   font-style: normal;
   color: var(--gold);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .node.owned {
@@ -482,7 +483,7 @@ button.danger {
 }
 
 .toast span {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .toast.gold {
