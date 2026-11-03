@@ -4,8 +4,8 @@ import type { GameState } from "./state";
 // The golden koi: every few minutes it swims across the pond for a short
 // while. Catch it for a reward.
 
-export const GOLDEN_MIN = 120; // seconds between visits, before upgrades
-export const GOLDEN_MAX = 300;
+export const GOLDEN_MIN = 180; // seconds between visits, before upgrades
+export const GOLDEN_MAX = 480;
 export const GOLDEN_STAY = 13; // seconds on screen, before upgrades
 
 export type GoldenOutcome =

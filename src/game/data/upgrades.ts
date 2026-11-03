@@ -28,7 +28,7 @@ export interface UpgradeDef {
 // Restoration: each stage cleans up the pond and boosts everything a little.
 // The renderer reads how many stages are done.
 const RESTORATION: [string, string, string, number][] = [
-  ["Fish out the trash", "Haul the tire and cans out of the water.", "trash", 30],
+  ["Fish out the trash", "Haul the tire and cans out of the water.", "trash", 20],
   ["Scrape the algae", "Green slime off the stones and the surface.", "algae", 150],
   ["Reset the edging stones", "Lift the fallen stones back into a ring.", "stones", 700],
   ["Pull the weeds", "The bank breathes again.", "weeds", 3000],
@@ -36,10 +36,10 @@ const RESTORATION: [string, string, string, number][] = [
   ["Clear the water", "The murk settles. You can see shapes below.", "water", 55000],
   ["Lay a sand bed", "Pale sand and pebbles on the bottom.", "sand", 2.5e5],
   ["Crystal-clear water", "Every scale glints in the light.", "water2", 1.6e6],
-  ["Clear skies", "The clouds part over your pond.", "sky", 1e7],
-  ["Maple garden", "Maples lean over the water.", "garden", 7e7],
-  ["Raked gravel", "Calm lines around the pond.", "gravel", 6e8],
-  ["Moon-viewing deck", "A place to sit and watch the water.", "deck", 5e9],
+  ["Clear skies", "The clouds part over your pond.", "sky", 1.2e7],
+  ["Maple garden", "Maples lean over the water.", "garden", 2e8],
+  ["Raked gravel", "Calm lines around the pond.", "gravel", 8e9],
+  ["Moon-viewing deck", "A place to sit and watch the water.", "deck", 1.5e11],
 ];
 
 export const RESTORE_STAGES = RESTORATION.length;
@@ -72,10 +72,10 @@ function restoreUpgrades(): UpgradeDef[] {
   return RESTORATION.map(([name, desc, icon, cost], i) => ({
     id: `restore-${icon}`,
     name,
-    desc: `${desc} All production +10%.`,
+    desc: `${desc} All production +5%.`,
     kind: "restore" as const,
     cost,
-    effects: [{ kind: "globalMult" as const, mult: 1.1 }],
+    effects: [{ kind: "globalMult" as const, mult: 1.05 }],
     unlock: (s: GameState) => i === 0 || s.upgrades.includes(`restore-${RESTORATION[i - 1][2]}`),
     icon: `restore-${icon}`,
     restoreStage: i + 1,
@@ -161,7 +161,7 @@ const SYNERGIES: UpgradeDef[] = [
 ];
 
 const GOLDEN: UpgradeDef[] = [
-  { id: "golden-1", name: "Glint in the water", desc: "The golden koi visits twice as often and stays twice as long.", kind: "golden", cost: 7.7e5, effects: [{ kind: "goldenFreq", mult: 2 }], unlock: (s) => s.goldenClicks >= 3, icon: "golden" },
+  { id: "golden-1", name: "Glint in the water", desc: "The golden koi visits 50% more often and stays a little longer.", kind: "golden", cost: 7.7e5, effects: [{ kind: "goldenFreq", mult: 1.5 }], unlock: (s) => s.goldenClicks >= 3, icon: "golden" },
   { id: "golden-2", name: "Lucky scales", desc: "Golden koi rewards are twice as big.", kind: "golden", cost: 7.7e7, effects: [{ kind: "goldenPower", mult: 2 }], unlock: (s) => s.goldenClicks >= 7, icon: "golden" },
   { id: "golden-3", name: "Old friend", desc: "The golden koi visits even more often.", kind: "golden", cost: 7.7e9, effects: [{ kind: "goldenFreq", mult: 1.5 }], unlock: (s) => s.goldenClicks >= 27, icon: "golden" },
 ];

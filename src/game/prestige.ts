@@ -6,7 +6,7 @@ import { emptyProducers, hasCelestial, type GameState } from "./state";
 // starts over, and you keep Dragon Scales for every ascension's worth of
 // ripples earned across all runs.
 
-export const GATE_THRESHOLD = 1e12;
+export const GATE_THRESHOLD = 5e12;
 
 export function scalesFor(lifetimeEarned: number): number {
   return Math.floor(Math.cbrt(lifetimeEarned / GATE_THRESHOLD));

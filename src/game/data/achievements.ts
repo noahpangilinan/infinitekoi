@@ -20,7 +20,7 @@ const EARNED: [number, string][] = [
   [1e6, "Millionaire pond"],
   [1e8, "Deep waters"],
   [1e10, "Tidal"],
-  [1e12, "Ready for the gate"],
+  [5e12, "Ready for the gate"],
   [1e14, "Ocean in a pond"],
   [1e16, "Infinite ripples"],
 ];

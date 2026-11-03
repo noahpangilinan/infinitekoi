@@ -17,7 +17,7 @@ import {
 import { catchGolden, tickGolden } from "../src/game/events";
 import { formatNumber, formatTime } from "../src/game/format";
 import { applyOffline } from "../src/game/offline";
-import { ascend, buyCelestial, canAscend, pendingScales, scalesFor } from "../src/game/prestige";
+import { ascend, buyCelestial, canAscend, GATE_THRESHOLD as G, pendingScales, scalesFor } from "../src/game/prestige";
 import { deserialize, newGame, serialize } from "../src/game/state";
 
 // A repeatable random sequence.
@@ -63,10 +63,10 @@ describe("production", () => {
     expect(buyUpgrade(s, "frog-2")).toBe(true);
     expect(rps(s)).toBeCloseTo(5 * 4);
     expect(buyUpgrade(s, "restore-trash")).toBe(true);
-    expect(rps(s)).toBeCloseTo(5 * 4 * 1.1);
+    expect(rps(s)).toBeCloseTo(5 * 4 * 1.05);
     s.achievements = ["a", "b"];
     s.scales = 10;
-    expect(rps(s)).toBeCloseTo(5 * 4 * 1.1 * 1.02 * 1.1);
+    expect(rps(s)).toBeCloseTo(5 * 4 * 1.05 * 1.02 * 1.1);
   });
 
   it("applies synergies per source owned", () => {
@@ -156,16 +156,16 @@ describe("golden koi", () => {
 describe("prestige", () => {
   it("gives scales by cube root of lifetime ripples", () => {
     expect(scalesFor(0)).toBe(0);
-    expect(scalesFor(1e12 - 1)).toBe(0);
-    expect(scalesFor(1e12)).toBe(1);
-    expect(scalesFor(8e12)).toBe(2);
-    expect(scalesFor(1e15)).toBe(10);
+    expect(scalesFor(G - 1)).toBe(0);
+    expect(scalesFor(G)).toBe(1);
+    expect(scalesFor(8 * G)).toBe(2);
+    expect(scalesFor(1000 * G)).toBe(10);
   });
 
   it("resets the run but keeps the long-term progress", () => {
     const s = newGame();
-    s.lifetimeEarned = 27e12;
-    s.runEarned = 27e12;
+    s.lifetimeEarned = 27 * G;
+    s.runEarned = 27 * G;
     s.ripples = 5e12;
     s.producers.koi = 40;
     s.upgrades = ["restore-trash", "koi-1"];
@@ -190,7 +190,7 @@ describe("prestige", () => {
     expect(buyCelestial(s, "moon-pearl")).toBe(true);
     expect(buyCelestial(s, "remembered-pond")).toBe(true);
     expect(s.scalesSpent).toBe(4);
-    s.lifetimeEarned = 2e15;
+    s.lifetimeEarned = 1331 * G; // 11 scales, one more than already held
     ascend(s);
     expect(restorationLevel(s)).toBe(6);
   });
