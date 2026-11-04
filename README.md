@@ -40,9 +40,9 @@ npm run build      # static site in dist/
 npm run balance    # headless greedy player, prints time to each milestone
 ```
 
-Pushing to `main` builds and publishes to GitHub Pages
-(`.github/workflows/pages.yml`). In the repo settings, set **Pages → Source** to
-**GitHub Actions** once.
+Hosted on Netlify, which builds from `main` using `netlify.toml` (tests, then
+`npm run build`, publishing `dist/`). GitHub Actions runs the same tests and
+build on every push (`.github/workflows/ci.yml`).
 
 ### Debug views
 

@@ -1,0 +1,14 @@
+# Netlify builds the static site from main. Tests run first, so a broken
+# build never goes live.
+[build]
+  command = "npm test && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Fingerprinted assets never change; cache them for a year.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
