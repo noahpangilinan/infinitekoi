@@ -40,7 +40,7 @@ export function debugState(name: string): GameState | null {
       break;
     case "late":
       restoredTo(s, RESTORE_STAGES);
-      withProducers(s, [100, 80, 60, 40, 30, 4, 4, 1, 1, 1]);
+      withProducers(s, [100, 80, 60, 40, 30, 4, 4, 1, 1, 1, 6, 4]);
       break;
     default:
       return null;

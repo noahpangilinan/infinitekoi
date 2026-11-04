@@ -11,7 +11,9 @@ export type ProducerId =
   | "lantern"
   | "waterfall"
   | "bridge"
-  | "gate";
+  | "gate"
+  | "spirit"
+  | "skykoi";
 
 export interface ProducerDef {
   id: ProducerId;
@@ -34,6 +36,8 @@ export const PRODUCERS: ProducerDef[] = [
   { id: "waterfall", name: "Waterfall", plural: "Waterfalls", desc: "Falling water, endless ripples.", baseCost: 3.3e8, baseRate: 44000, visualCap: 1 },
   { id: "bridge", name: "Arched bridge", plural: "Arched bridges", desc: "Footsteps above, reflections below.", baseCost: 5.1e9, baseRate: 260000, visualCap: 1 },
   { id: "gate", name: "Shrine gate", plural: "Shrine gates", desc: "Blessed waters ripple on their own.", baseCost: 7.5e10, baseRate: 1.6e6, visualCap: 1 },
+  { id: "spirit", name: "Spirit light", plural: "Spirit lights", desc: "A soft wisp that drifts over the water, humming.", baseCost: 1e12, baseRate: 1e7, visualCap: 10 },
+  { id: "skykoi", name: "Sky koi", plural: "Sky koi", desc: "A koi that has learned to swim through the clouds.", baseCost: 1.4e13, baseRate: 6.5e7, visualCap: 6 },
 ];
 
 export const PRODUCER_IDS = PRODUCERS.map((p) => p.id);

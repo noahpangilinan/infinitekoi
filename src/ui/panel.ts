@@ -52,6 +52,7 @@ const KIND_NAMES: [UpgradeKind, string][] = [
   ["click", "Clicks"],
   ["synergy", "Synergies"],
   ["golden", "Golden koi"],
+  ["harmony", "Harmony"],
 ];
 
 const THEME_NAMES: Record<string, string> = { classic: "Classic", moonlit: "Moonlit", autumn: "Autumn", sakura: "Sakura" };

@@ -105,6 +105,7 @@ export class Renderer {
     this.clarity = this.clarity < 0 ? target : this.clarity + (target - this.clarity) * Math.min(1, dt * 0.8);
 
     ctx.drawImage(this.background, 0, 0);
+    this.life.drawSky(ctx, time);
     this.water.draw(time, {
       clarity: this.clarity,
       sand: has("sand"),

@@ -8,6 +8,7 @@ import {
   checkAchievements,
   click,
   clickValue,
+  COST_GROWTH,
   costOf,
   maxAffordable,
   restorationLevel,
@@ -27,14 +28,14 @@ function seq(...values: number[]): () => number {
 }
 
 describe("costs", () => {
-  it("grows 15% per owned", () => {
+  it("grows 18% per owned", () => {
     expect(costOf("tadpole", 0)).toBe(15);
-    expect(costOf("tadpole", 1)).toBe(Math.ceil(15 * 1.15));
-    expect(costOf("frog", 10)).toBe(Math.ceil(100 * Math.pow(1.15, 10)));
+    expect(costOf("tadpole", 1)).toBe(Math.ceil(15 * COST_GROWTH));
+    expect(costOf("frog", 10)).toBe(Math.ceil(100 * Math.pow(COST_GROWTH, 10)));
   });
 
   it("sums a batch", () => {
-    const one = [0, 1, 2].map((n) => 15 * Math.pow(1.15, n)).reduce((a, b) => a + b, 0);
+    const one = [0, 1, 2].map((n) => 15 * Math.pow(COST_GROWTH, n)).reduce((a, b) => a + b, 0);
     expect(costOf("tadpole", 0, 3)).toBe(Math.ceil(one));
   });
 
@@ -99,7 +100,7 @@ describe("production", () => {
 
   it("orders restoration stages", () => {
     const s = newGame();
-    s.ripples = 1e14;
+    s.ripples = 1e16;
     for (const u of UPGRADES.filter((u) => u.restoreStage).sort((a, b) => a.restoreStage! - b.restoreStage!)) {
       expect(buyUpgrade(s, u.id)).toBe(true);
     }

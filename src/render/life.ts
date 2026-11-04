@@ -6,6 +6,7 @@ import { dot, ellipse } from "./draw";
 import type { PondLayout } from "./layout";
 import type { Effects } from "./particles";
 import { hash2, mulberry32 } from "./rng";
+import { VARIETIES } from "../game/data/varieties";
 import { drawFrog, drawFrogLeap, drawTadpole, drawTurtleBasking, drawTurtleSwimming } from "./sprites/critters";
 import { goldenLook, HEADINGS, KOI_SIZE, koiLook, KoiSprites, FRAMES, type KoiLook } from "./sprites/koi";
 import { drawLily, drawReeds } from "./sprites/plants";
@@ -65,6 +66,18 @@ interface Lily {
 const SHADOW = hex("#0e2430");
 const SPARKLE = hex("#fff5c0");
 const FIREFLY = hex("#e9ff8a");
+const WISP = hex("#a8ecff");
+const WISP_CORE = hex("#f2fdff");
+
+interface SkyKoi {
+  x: number;
+  y: number;
+  dir: number; // 1 swimming right, -1 left
+  speed: number;
+  phase: number;
+  key: string;
+  look: KoiLook;
+}
 const ROCK = hex("#7d7a70");
 const ROCK_LIGHT = hex("#a6a296");
 
@@ -80,6 +93,7 @@ export class PondLife {
   private turtles: Swimmer[] = [];
   private frogs: Frog[] = [];
   private lilies: Lily[] = [];
+  private skyKoi: SkyKoi[] = [];
   private counts: Partial<Record<ProducerId, number>> = {};
   private rng = mulberry32(99);
 
@@ -92,6 +106,7 @@ export class PondLife {
     this.turtles = [];
     this.frogs = [];
     this.lilies = [];
+    this.skyKoi = [];
     this.golden = null;
   }
 
@@ -137,6 +152,22 @@ export class PondLife {
     if (this.lilies.length !== lilies) this.placeLilies(lilies);
     for (const id of ["reeds", "lantern", "waterfall", "bridge", "gate"] as ProducerId[]) this.counts[id] = want(id);
     this.counts.turtle = want("turtle");
+    this.counts.spirit = want("spirit");
+    const sky = want("skykoi");
+    while (this.skyKoi.length > sky) this.skyKoi.pop();
+    for (let i = this.skyKoi.length; i < sky; i++) {
+      const v = VARIETIES[Math.floor(hash2(i, 1, 41) * VARIETIES.length)].id;
+      const seed = Math.floor(hash2(i, 2, 41) * 2 ** 31);
+      this.skyKoi.push({
+        x: this.rng() * this.L.W,
+        y: 0,
+        dir: i % 2 ? -1 : 1,
+        speed: 5 + this.rng() * 4,
+        phase: this.rng() * 6,
+        key: `sky-${v}-${seed}`,
+        look: koiLook(v, seed),
+      });
+    }
 
     if (state.golden.timeLeft > 0 && !this.golden) {
       this.golden = { ...this.swimmer(0.3), key: "golden", look: goldenLook(), golden: true };
@@ -206,6 +237,12 @@ export class PondLife {
       this.swim(t, dt, 7, 0.04, 0.3);
     }
     for (const t of this.turtles) this.swim(t, dt, 4, 0.2);
+    for (const k of this.skyKoi) {
+      k.x += k.dir * k.speed * dt;
+      k.phase += dt;
+      if (k.x > L.W + KOI_SIZE) k.x = -KOI_SIZE;
+      if (k.x < -KOI_SIZE) k.x = L.W + KOI_SIZE;
+    }
     for (const fr of this.frogs) this.frog(fr, dt);
   }
 
@@ -381,12 +418,46 @@ export class PondLife {
     if ((this.counts.bridge ?? 0) > 0) drawBridge(ctx, L.bridge.x1, L.bridge.x2, L.bridge.y);
   }
 
+  // Koi swimming through the sky, drawn over the clouds and behind the trees'
+  // tops. They bob as if riding waves of air and leave a faint wake.
+  drawSky(ctx: CanvasRenderingContext2D, time: number): void {
+    const L = this.L;
+    for (const [i, k] of this.skyKoi.entries()) {
+      const band = L.horizon * (0.25 + (i % 3) * 0.2);
+      const y = band + Math.sin(k.phase * 0.8) * 4;
+      const climb = Math.cos(k.phase * 0.8) * 0.25; // nose up as it rises
+      const heading = (k.dir > 0 ? 0 : Math.PI) - climb * k.dir;
+      let h = Math.round((heading / (Math.PI * 2)) * HEADINGS) % HEADINGS;
+      if (h < 0) h += HEADINGS;
+      for (let w = 1; w <= 4; w++) {
+        dot(ctx, k.x - k.dir * (6 + w * 3), y + Math.sin(k.phase * 0.8 - w * 0.4) * 2, hex("#ffffff"), 0.45 - w * 0.09);
+      }
+      ctx.globalAlpha = 0.92;
+      ctx.drawImage(this.sprites.get(k.key, k.look, h, Math.floor(time * 4 + i) % FRAMES, 1), Math.round(k.x - KOI_SIZE / 2), Math.round(y - KOI_SIZE / 2));
+      ctx.globalAlpha = 1;
+    }
+  }
+
   // Added light, drawn after the night tint: lantern glow and fireflies.
   drawGlow(ctx: CanvasRenderingContext2D, time: number, light: Light, fireflies: boolean): void {
     const L = this.L;
     for (let i = 0; i < (this.counts.lantern ?? 0); i++) {
       const s = L.lanternSpots[i];
       drawLanternGlow(ctx, s.x, s.y, light.night, Math.sin(time * 9 + i * 3));
+    }
+    // Spirit lights: soft wisps drifting over the water, brighter at night.
+    const spirits = this.counts.spirit ?? 0;
+    const glow = 0.45 + 0.55 * light.night;
+    for (let i = 0; i < spirits; i++) {
+      const t = time * (0.12 + hash2(i, 1, 51) * 0.08) + i * 2.1;
+      const x = L.cx + Math.cos(t) * L.rx * (0.3 + hash2(i, 2, 51) * 0.45);
+      const water = L.cy + Math.sin(t * 1.3) * L.ry * 0.5;
+      const y = water - 7 - Math.sin(time * 1.7 + i) * 2;
+      ellipse(ctx, x, water + 1, 3, 1, WISP, 0.12 * glow); // reflection
+      for (let k = 1; k <= 3; k++) dot(ctx, x - Math.cos(t) * k * 1.5, y + k * 0.8, WISP, (0.35 - k * 0.09) * glow);
+      ellipse(ctx, x, y, 5, 4, WISP, 0.1 * glow);
+      ellipse(ctx, x, y, 2.5, 2, WISP, 0.35 * glow);
+      dot(ctx, x, y, WISP_CORE, glow);
     }
     if (fireflies && light.night > 0.5) {
       const a = (light.night - 0.5) * 2;

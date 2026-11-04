@@ -5,12 +5,13 @@ import { upgrade, UPGRADES, type Effect, type UpgradeDef } from "./data/upgrades
 import { rollVariety } from "./data/varieties";
 import { has, MAX_KOI_KEPT, type GameState } from "./state";
 
-export const COST_GROWTH = 1.15;
+export const COST_GROWTH = 1.18;
 
 // Price of the next `amount` of a producer when `owned` are already owned.
 export function costOf(id: ProducerId, owned: number, amount = 1): number {
   const base = producer(id).baseCost * Math.pow(COST_GROWTH, owned);
-  return Math.ceil((base * (Math.pow(COST_GROWTH, amount) - 1)) / (COST_GROWTH - 1));
+  // The tiny shave stops float error (15.0000000001) from rounding up a whole ripple.
+  return Math.ceil(((base * (Math.pow(COST_GROWTH, amount) - 1)) / (COST_GROWTH - 1)) * (1 - 1e-12));
 }
 
 // How many can be bought with `budget`.
@@ -42,6 +43,9 @@ export function globalMult(state: GameState): number {
   for (const e of ownedEffects(state)) if (e.kind === "globalMult") mult *= e.mult;
   for (const e of celestialEffects(state)) if (e.kind === "globalMult") mult *= e.mult;
   mult *= 1 + 0.01 * state.achievements.length;
+  let harmony = 0;
+  for (const e of ownedEffects(state)) if (e.kind === "harmony") harmony += e.perAchievement;
+  mult *= 1 + harmony * state.achievements.length;
   mult *= 1 + 0.02 * state.discovered.length;
   mult *= 1 + 0.01 * state.scales;
   return mult;

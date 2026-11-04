@@ -68,6 +68,25 @@ const PAINTERS: Record<string, (ctx: CanvasRenderingContext2D) => void> = {
     rect(ctx, 17, 8, 2, 6, hex("#c4382c"));
   },
   gate: (ctx) => drawGate(ctx, 10, 31),
+  spirit: (ctx) => {
+    ellipse(ctx, 10, 11, 9, 8, hex("#1d2b4a"));
+    ellipse(ctx, 10, 10, 6, 5, hex("#a8ecff"), 0.2);
+    ellipse(ctx, 10, 10, 3.5, 3, hex("#a8ecff"), 0.6);
+    ellipse(ctx, 10, 10, 1.5, 1.5, hex("#f2fdff"));
+    dot(ctx, 7, 13, hex("#a8ecff"), 0.6);
+    dot(ctx, 5, 15, hex("#a8ecff"), 0.35);
+  },
+  skykoi: (ctx) => {
+    ellipse(ctx, 10, 11, 9, 8, hex("#6db3e0"));
+    ellipse(ctx, 6, 15, 5, 2, hex("#ffffff"));
+    ellipse(ctx, 14, 16, 4, 1.5, hex("#ffffff"));
+    ctx.drawImage(drawKoiFrame(koiLook("showa", 5), 15, 0, 1), 1, 0);
+  },
+  harmony: (ctx) => {
+    pool(ctx);
+    ctx.drawImage(drawKoiFrame(koiLook("kohaku", 3), 4, 0, 1), -3, -2);
+    ctx.drawImage(drawKoiFrame(koiLook("ghost", 8), 12, 0, 1), 5, 4);
+  },
   click: (ctx) => {
     pool(ctx);
     ring(ctx, 10, 12, 6, 3, hex("#ffffff"), 0.9);
