@@ -4,6 +4,7 @@ import { drawFrog, drawTadpole, drawTurtleBasking } from "../render/sprites/crit
 import { drawKoiFrame, goldenLook, koiLook } from "../render/sprites/koi";
 import { drawLily, drawReeds } from "../render/sprites/plants";
 import { drawGate, drawLantern } from "../render/sprites/structures";
+import { drawCrane, drawFox, drawKappa, drawRabbit } from "../render/mythic";
 
 // Small pixel icons for the shop, drawn with the same code as the pond and
 // cached as image URLs. 20×20 pixels, shown at 2× or 3×.
@@ -81,6 +82,54 @@ const PAINTERS: Record<string, (ctx: CanvasRenderingContext2D) => void> = {
     ellipse(ctx, 6, 15, 5, 2, hex("#ffffff"));
     ellipse(ctx, 14, 16, 4, 1.5, hex("#ffffff"));
     ctx.drawImage(drawKoiFrame(koiLook("showa", 5), 15, 0, 1), 1, 0);
+  },
+  rabbit: (ctx) => {
+    ellipse(ctx, 10, 11, 9, 8, hex("#1d2b4a"));
+    ellipse(ctx, 13, 7, 4, 4, hex("#fff3c4"));
+    drawRabbit(ctx, 9, 17, 0, 1, 0);
+  },
+  kappa: (ctx) => {
+    pool(ctx);
+    drawKappa(ctx, 9, 17, 1, 0);
+  },
+  crane: (ctx) => {
+    pool(ctx);
+    drawCrane(ctx, 8, 18, 1, 0);
+  },
+  fox: (ctx) => {
+    ellipse(ctx, 10, 11, 9, 8, hex("#3a2a1d"));
+    drawFox(ctx, 10, 18, 1, 0);
+    ellipse(ctx, 15, 5, 1.5, 2, hex("#8ad8ff"));
+  },
+  rainbow: (ctx) => {
+    ellipse(ctx, 10, 11, 9, 8, hex("#6db3e0"));
+    const bands = ["#e8505a", "#f0954a", "#f2d24a", "#6fc06a", "#5a9ae0", "#8a6ad0"];
+    bands.forEach((c, b) => ring(ctx, 10, 16, 8 - b, 8 - b, hex(c)));
+    ctx.clearRect(0, 16, 20, 4);
+  },
+  island: (ctx) => {
+    ellipse(ctx, 10, 11, 9, 8, hex("#6db3e0"));
+    for (let k = 0; k < 7; k++) rect(ctx, 10 - (7 - k), 9 + k, (7 - k) * 2, 1, hex(k % 3 === 2 ? "#55524b" : "#7d7a70"));
+    ellipse(ctx, 10, 9, 8, 1.5, hex("#5a8f3c"));
+    rect(ctx, 11, 6, 3, 2, hex("#c4382c"));
+    ellipse(ctx, 6, 6, 2.5, 1.5, hex("#2e5a38"));
+  },
+  dragon: (ctx) => {
+    pool(ctx);
+    for (let i = 8; i >= 0; i--) ellipse(ctx, 4 + i * 1.5, 12 + Math.sin(i) * 2.5, 2.2 - i * 0.12, 1.6, hex(i % 2 ? "#3fae8a" : "#24705a"));
+    ellipse(ctx, 3, 12, 2.5, 2, hex("#3fae8a"));
+    dot(ctx, 2, 11, hex("#1e1a18"));
+    dot(ctx, 6, 10, hex("#f2c14e"));
+  },
+  river: (ctx) => {
+    ellipse(ctx, 10, 11, 9, 8, hex("#141c3a"));
+    for (let i = 0; i < 40; i++) {
+      const x = 2 + ((i * 7) % 16);
+      const y = 4 + x * 0.6 + (((i * 13) % 7) - 3);
+      dot(ctx, x, y, hex("#fff6d8"), 0.4 + ((i * 3) % 6) / 10);
+    }
+    dot(ctx, 10, 10, hex("#fff6d8"));
+    dot(ctx, 9, 10, hex("#f2c14e"));
   },
   harmony: (ctx) => {
     pool(ctx);

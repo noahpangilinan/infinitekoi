@@ -42,6 +42,10 @@ export function debugState(name: string): GameState | null {
       restoredTo(s, RESTORE_STAGES);
       withProducers(s, [100, 80, 60, 40, 30, 4, 4, 1, 1, 1, 6, 4]);
       break;
+    case "myth":
+      restoredTo(s, RESTORE_STAGES);
+      withProducers(s, [100, 80, 60, 40, 30, 4, 4, 1, 1, 1, 6, 4, 6, 3, 3, 2, 1, 1, 1, 1]);
+      break;
     default:
       return null;
   }

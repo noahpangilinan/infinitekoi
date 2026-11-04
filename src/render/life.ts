@@ -383,9 +383,9 @@ export class PondLife {
   }
 
   // On and around the bank, back to front.
-  drawBank(ctx: CanvasRenderingContext2D, time: number, light: Light): void {
+  drawBank(ctx: CanvasRenderingContext2D, time: number, light: Light, extra: { y: number; draw: () => void }[] = []): void {
     const L = this.L;
-    const items: { y: number; draw: () => void }[] = [];
+    const items: { y: number; draw: () => void }[] = [...extra];
     if ((this.counts.gate ?? 0) > 0) items.push({ y: L.gate.y, draw: () => drawGate(ctx, L.gate.x, L.gate.y) });
     if ((this.counts.waterfall ?? 0) > 0) items.push({ y: L.waterfall.y - 30, draw: () => drawWaterfall(ctx, L.waterfall.x, L.waterfall.y, time) });
     for (let i = 0; i < (this.counts.reeds ?? 0); i++) {

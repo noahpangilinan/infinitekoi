@@ -13,7 +13,15 @@ export type ProducerId =
   | "bridge"
   | "gate"
   | "spirit"
-  | "skykoi";
+  | "skykoi"
+  | "rabbit"
+  | "kappa"
+  | "crane"
+  | "fox"
+  | "rainbow"
+  | "island"
+  | "dragon"
+  | "river";
 
 export interface ProducerDef {
   id: ProducerId;
@@ -38,6 +46,14 @@ export const PRODUCERS: ProducerDef[] = [
   { id: "gate", name: "Shrine gate", plural: "Shrine gates", desc: "Blessed waters ripple on their own.", baseCost: 7.5e10, baseRate: 1.6e6, visualCap: 1 },
   { id: "spirit", name: "Spirit light", plural: "Spirit lights", desc: "A soft wisp that drifts over the water, humming.", baseCost: 1e12, baseRate: 1e7, visualCap: 10 },
   { id: "skykoi", name: "Sky koi", plural: "Sky koi", desc: "A koi that has learned to swim through the clouds.", baseCost: 1.4e13, baseRate: 6.5e7, visualCap: 6 },
+  { id: "rabbit", name: "Moon rabbit", plural: "Moon rabbits", desc: "Hops down from the moon to pound mochi by the water.", baseCost: 1.7e14, baseRate: 4.3e8, visualCap: 6 },
+  { id: "kappa", name: "Kappa", plural: "Kappa", desc: "A river imp with a dish of water on its head. Loves cucumbers.", baseCost: 2.1e15, baseRate: 2.9e9, visualCap: 3 },
+  { id: "crane", name: "Crane", plural: "Cranes", desc: "Wades the shallows on long legs. Said to live a thousand years.", baseCost: 2.6e16, baseRate: 2.1e10, visualCap: 3 },
+  { id: "fox", name: "Shrine fox", plural: "Shrine foxes", desc: "A white messenger of the shrine, trailing fox-fire at night.", baseCost: 3.1e17, baseRate: 1.5e11, visualCap: 2 },
+  { id: "rainbow", name: "Rainbow", plural: "Rainbows", desc: "An arc of colour over the garden. The koi leap to touch it.", baseCost: 7.1e19, baseRate: 1.1e12, visualCap: 1 },
+  { id: "island", name: "Floating isle", plural: "Floating isles", desc: "A scrap of land drifting in the sky, a tiny shrine on top.", baseCost: 1.2e22, baseRate: 8.3e12, visualCap: 1 },
+  { id: "dragon", name: "Pond dragon", plural: "Pond dragons", desc: "A koi that climbed the falls, come home to coil in the deep.", baseCost: 1.9e24, baseRate: 6.4e13, visualCap: 1 },
+  { id: "river", name: "Heavenly river", plural: "Heavenly rivers", desc: "The Milky Way pours across the night, full of star koi.", baseCost: 5.4e26, baseRate: 4.3e14, visualCap: 1 },
 ];
 
 export const PRODUCER_IDS = PRODUCERS.map((p) => p.id);

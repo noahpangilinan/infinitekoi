@@ -259,8 +259,11 @@ describe("formatting", () => {
     expect(formatNumber(1.5)).toBe("1.5");
     expect(formatNumber(999)).toBe("999");
     expect(formatNumber(1234)).toBe("1.234 K");
-    expect(formatNumber(56_700_000)).toBe("56.70 M");
-    expect(formatNumber(1e15)).toBe("1.000 Qa");
+    expect(formatNumber(56_700_000)).toBe("56.7 M");
+    expect(formatNumber(1e15)).toBe("1 Qa");
+    expect(formatNumber(1e12)).toBe("1 T");
+    expect(formatNumber(999_960_000_000)).toBe("1 T");
+    expect(formatNumber(100e9)).toBe("100 B");
     expect(formatNumber(1e80)).toMatch(/e80$/);
   });
 

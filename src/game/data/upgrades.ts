@@ -84,6 +84,14 @@ const TIER_NAMES: Record<ProducerId, string[]> = {
   bridge: ["Red lacquer", "Stone pillars", "Moon bridge", "Lantern bridge", "Pilgrims' crossing", "Bridge of reflections", "Bridge to heaven", "Zigzag planks", "Moon gate", "Floating bridge", "Rainbow bridge"],
   gate: ["Sacred rope", "Paper charms", "Offerings", "Thousand gates", "Shrine maiden", "Kami's favour", "The gate between", "Fox statues", "Vermilion path", "Mountain shrine", "Gate of ages"],
   spirit: ["Faint wisps", "Blue flames", "Will-o'-wisps", "Fox fire", "Ancestor lights", "Spirit choir", "Lights of Obon", "Firefly kin", "Lantern ghosts", "Star souls", "Glow eternal"],
+  rabbit: ["Mochi mallets", "Moon dust", "Long ears", "Rabbit warren", "Harvest moon", "Jade rabbit", "Rabbit in the moon", "Clover patches", "Mochi festival", "Lunar court", "Moon's own rabbit"],
+  kappa: ["Fresh cucumbers", "Full dishes", "Sumo practice", "Kappa clans", "River lords", "Ancient pacts", "Kappa king", "Webbed hands", "Polite bows", "Water magic", "Elder of the rivers"],
+  crane: ["Red crowns", "Long legs", "Courtship dance", "Paper cranes", "Thousand cranes", "Crane wives", "Crane of ages", "Shallow feeding", "Winter flocks", "Cloud wings", "Crane immortal"],
+  fox: ["Rice offerings", "Red bibs", "Fox-fire", "Fox weddings", "Nine tails", "Inari's favour", "Celestial fox", "Shrine bells", "Sun showers", "Thousand-year fox", "Fox of heaven"],
+  rainbow: ["Sun showers", "Double arcs", "Moonbows", "Spectrum", "Rainbow bridge", "Endless arc", "Colour of heaven", "Misty mornings", "Pot of koi", "Prism waters", "The first rainbow"],
+  island: ["Floating stones", "Hanging gardens", "Sky shrine", "Island chains", "Cloud harbour", "Drifting realm", "Island of the immortals", "Sky moss", "Falling springs", "Sky village", "Heaven's shore"],
+  dragon: ["Pearl of wisdom", "Rain calling", "Jade scales", "Dragon's breath", "Dragon king", "Storm rider", "Ancestor dragon", "Whiskers", "Thunder coils", "Dragon palace", "Dragon of the source"],
+  river: ["Stardust", "Weaver star", "Cowherd star", "Tanabata", "Magpie bridge", "Star koi", "River of heaven", "Wishing papers", "Meteor showers", "Galaxy spiral", "The endless river"],
   skykoi: ["Cloud fins", "Wind scales", "High currents", "Rainbow trails", "Thunder koi", "Comet tails", "Milky Way koi", "Updrafts", "Cloud schools", "Sun-chasers", "Koi of heaven"],
 };
 
@@ -195,6 +203,14 @@ const SYNERGIES: UpgradeDef[] = [
   synergy("syn-lantern-spirit", "Lanterns call the spirits", "Spirit lights +1% for every lantern.", "lantern", "spirit", 25, 3e14),
   synergy("syn-koi-skykoi", "Koi dream of flying", "Sky koi +1% for every koi.", "koi", "skykoi", 50, 1e15),
   synergy("syn-spirit-skykoi", "Spirit currents", "Sky koi +1% for every spirit light.", "spirit", "skykoi", 10, 3e15),
+  synergy("syn-lantern-rabbit", "Lanterns light the way", "Moon rabbits +1% for every lantern.", "lantern", "rabbit", 50, 1e16),
+  synergy("syn-koi-kappa", "Kappa and koi", "Kappa +1% for every koi.", "koi", "kappa", 100, 1e17),
+  synergy("syn-reeds-crane", "Cranes in the reeds", "Cranes +1% for every reed.", "reeds", "crane", 100, 1.3e18),
+  synergy("syn-gate-fox", "Messengers of the shrine", "Shrine foxes +1% for every shrine gate.", "gate", "fox", 50, 1.5e19),
+  synergy("syn-waterfall-rainbow", "Rainbow in the spray", "Rainbows +1% for every waterfall.", "waterfall", "rainbow", 50, 3.5e21),
+  synergy("syn-skykoi-island", "Koi circle the isle", "Floating isles +1% for every sky koi.", "skykoi", "island", 50, 6e23),
+  synergy("syn-koi-dragon", "The koi's ascent", "Pond dragons +1% for every koi.", "koi", "dragon", 150, 1e26),
+  synergy("syn-spirit-river", "Souls in the river", "Heavenly rivers +1% for every spirit light.", "spirit", "river", 50, 2.5e28),
 ];
 
 // Harmony: production grows with every achievement earned.

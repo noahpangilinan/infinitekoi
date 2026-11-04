@@ -22,9 +22,12 @@ const EARNED: [number, string][] = [
   [1e10, "Tidal"],
   [1e12, "A trillion rings"],
   [1e14, "Beyond the horizon"],
-  [3e15, "Ready for the gate"],
+  [6e15, "Ready for the gate"],
   [1e16, "Ocean in a pond"],
-  [1e18, "Infinite ripples"],
+  [1e18, "A sea of rings"],
+  [1e21, "Sextillion splash"],
+  [1e24, "Ripples to the stars"],
+  [1e27, "Infinite ripples"],
 ];
 
 export const ACHIEVEMENTS: AchievementDef[] = [

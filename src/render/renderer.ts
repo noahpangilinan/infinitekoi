@@ -15,6 +15,7 @@ import { drawAlgae, drawTrash } from "./shabby";
 import { Water } from "./water";
 import { drawAscension, raining, Weather } from "./weather";
 import { Wildlife } from "./wildlife";
+import { Mythic } from "./mythic";
 
 const ASCENSION_SECONDS = 5;
 
@@ -36,6 +37,7 @@ export class Renderer {
   life!: PondLife;
   private weather!: Weather;
   private wildlife!: Wildlife;
+  private mythic!: Mythic;
   private ascension: { t: number; onFlash: () => void; flashed: boolean } | null = null;
   pointer: Pointer = { x: -100, y: -100, idle: 0, over: false };
   phaseOverride: number | null = null;
@@ -53,10 +55,12 @@ export class Renderer {
       this.life.setLayout(this.layout);
       this.weather.setLayout(this.layout);
       this.wildlife.setLayout(this.layout);
+      this.mythic.setLayout(this.layout);
     } else {
       this.life = new PondLife(this.layout, this.fx);
       this.weather = new Weather(this.layout, this.fx);
       this.wildlife = new Wildlife(this.layout);
+      this.mythic = new Mythic(this.layout, this.fx);
     }
     this.lookKey = "";
   }
@@ -105,6 +109,7 @@ export class Renderer {
     this.clarity = this.clarity < 0 ? target : this.clarity + (target - this.clarity) * Math.min(1, dt * 0.8);
 
     ctx.drawImage(this.background, 0, 0);
+    this.mythic.drawSky(ctx, time, light);
     this.life.drawSky(ctx, time);
     this.water.draw(time, {
       clarity: this.clarity,
@@ -127,6 +132,9 @@ export class Renderer {
     this.fx.update(dt);
     this.weather.update(dt, rain, petals);
     this.wildlife.update(dt, has("nectar"));
+    this.mythic.sync(state);
+    this.mythic.update(dt, time);
+    this.mythic.drawUnder(ctx, time, this.clarity);
     this.life.drawUnder(ctx, this.clarity, time);
     if (!has("algae")) drawAlgae(ctx, L, time);
     if (!has("trash")) drawTrash(ctx, L, time);
@@ -136,7 +144,7 @@ export class Renderer {
     this.weather.drawFloating(ctx);
     ctx.drawImage(this.rim, 0, 0);
     if (has("deck")) drawDeck(ctx, L, time, has("festival"), light.night);
-    this.life.drawBank(ctx, time, light);
+    this.life.drawBank(ctx, time, light, this.mythic.bankItems(ctx, time));
     ctx.drawImage(this.front, 0, 0);
     if (has("basin")) this.wildlife.drawBasin(ctx);
     if (has("bamboo")) drawBamboo(ctx, L, time);
@@ -146,6 +154,7 @@ export class Renderer {
     this.drawLight(light, has("sky") && rain < 0.5, time, has("deck"));
     if (has("festival")) this.drawFestivalGlow(light, time);
     this.life.drawGlow(ctx, time, light, has("moss") || state.producers.reeds > 0);
+    this.mythic.drawGlow(ctx, time, light);
     this.weather.drawAir(ctx, time, rain);
 
     if (this.ascensionFreeze !== null) drawAscension(ctx, L, this.ascensionFreeze);
