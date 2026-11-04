@@ -213,6 +213,10 @@ button:disabled {
   background: #5a4a1a;
 }
 
+.group-label {
+  margin: 10px 0 4px;
+}
+
 .upg.poor {
   opacity: 0.45;
 }

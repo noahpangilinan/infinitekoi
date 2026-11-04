@@ -106,6 +106,8 @@ const panel = new Panel(document.getElementById("ui")!, state, {
   },
 });
 
+if (debug && params.has("tab")) panel.open(params.get("tab") as Parameters<Panel["open"]>[0]);
+
 // A nudge for brand-new ponds, gone after the first click.
 const hint = document.createElement("div");
 hint.id = "hint";

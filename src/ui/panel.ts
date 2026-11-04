@@ -1,7 +1,7 @@
 import { ACHIEVEMENTS } from "../game/data/achievements";
 import { CELESTIAL } from "../game/data/celestial";
 import { PRODUCERS, type ProducerId } from "../game/data/producers";
-import { upgrade, type UpgradeDef } from "../game/data/upgrades";
+import { upgrade, UPGRADES, type UpgradeDef, type UpgradeKind } from "../game/data/upgrades";
 import { VARIETIES } from "../game/data/varieties";
 import {
   availableUpgrades,
@@ -45,6 +45,14 @@ export interface PanelHooks {
 
 type Tab = "pond" | "koi" | "feats" | "gate" | "options";
 const TABS: [Tab, string][] = [["pond", "Pond"], ["koi", "Koi"], ["feats", "Feats"], ["gate", "Gate"], ["options", "Options"]];
+
+const KIND_NAMES: [UpgradeKind, string][] = [
+  ["restore", "Restoration"],
+  ["producer", "Pond life"],
+  ["click", "Clicks"],
+  ["synergy", "Synergies"],
+  ["golden", "Golden koi"],
+];
 
 const THEME_NAMES: Record<string, string> = { classic: "Classic", moonlit: "Moonlit", autumn: "Autumn", sakura: "Sakura" };
 
@@ -98,13 +106,16 @@ export class Panel {
     this.tabEls.get("gate")!.classList.toggle("glow", canAscend(s));
 
     this.slowClock += dt;
-    const key = this.tab === "pond" ? this.pondKey() : `${this.tab}`;
+    const key =
+      this.tab === "pond" ? this.pondKey()
+      : this.tab === "feats" ? `feats:${s.achievements.length}:${s.upgrades.length}`
+      : this.tab;
     if (key !== this.structureKey) {
       this.structureKey = key;
       this.render();
     } else if (this.tab === "pond") {
       this.refreshPond();
-    } else if (this.slowClock > 1 && this.tab !== "options") {
+    } else if (this.slowClock > 1 && this.tab !== "options" && this.tab !== "feats") {
       this.slowClock = 0;
       this.render();
     }
@@ -202,7 +213,11 @@ export class Panel {
     for (const [id, el] of this.upgradeEls) el.classList.toggle("poor", (upgrade(id)?.cost ?? 0) > s.ripples);
   }
 
-  private upgradeTip(u: UpgradeDef, e: MouseEvent): void {
+  private upgradeTip(u: UpgradeDef, e: MouseEvent, owned = false): void {
+    if (owned) {
+      showTip(`<b>${u.name}</b><p>${u.desc}</p><div class="good">Owned</div>`, e.clientX, e.clientY);
+      return;
+    }
     const poor = u.cost > this.state.ripples;
     showTip(`<b>${u.name}</b><p>${u.desc}</p><div class="${poor ? "bad" : "good"}">${fmt(u.cost)} ripples</div>`, e.clientX, e.clientY);
   }
@@ -257,6 +272,33 @@ export class Panel {
       h("p", { class: "small" }, `${s.achievements.length} / ${ACHIEVEMENTS.length} earned. Each adds +1% to all production.`),
       grid,
     );
+    this.renderOwnedUpgrades();
+  }
+
+  // Every upgrade bought this run, grouped by kind.
+  private renderOwnedUpgrades(): void {
+    const s = this.state;
+    const owned = UPGRADES.filter((u) => s.upgrades.includes(u.id));
+    this.body.append(
+      h("h3", {}, "Upgrades owned"),
+      h("p", { class: "small" }, owned.length
+        ? `${owned.length} / ${UPGRADES.length} bought this run.`
+        : "None yet. Upgrades appear above the pond life in the Pond tab."),
+    );
+    for (const [kind, label] of KIND_NAMES) {
+      const group = owned.filter((u) => u.kind === kind);
+      if (!group.length) continue;
+      const grid = h("div", { class: "upgrades" });
+      for (const u of group) {
+        grid.append(h("div", {
+          class: `upg kind-${u.kind}`,
+          onmouseenter: (e: Event) => this.upgradeTip(u, e as MouseEvent, true),
+          onmousemove: (e: Event) => this.upgradeTip(u, e as MouseEvent, true),
+          onmouseleave: hideTip,
+        }, h("img", { src: icon(u.icon), alt: u.name })));
+      }
+      this.body.append(h("div", { class: "small group-label" }, `${label} · ${group.length}`), grid);
+    }
   }
 
   private renderGate(): void {
