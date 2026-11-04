@@ -85,6 +85,8 @@ const PAINTERS: Record<string, (ctx: CanvasRenderingContext2D) => void> = {
 const RESTORE_COLORS: Record<string, string> = {
   trash: "#8a7a5a", algae: "#6f8f3a", stones: "#9b978c", weeds: "#b59a4a", moss: "#5e8b37", water: "#4fa3b0",
   sand: "#cdb98a", water2: "#5cc7d9", sky: "#6db3e0", garden: "#c94a30", gravel: "#c9c4b6", deck: "#9a6a3e",
+  fence: "#c9b46c", flowers: "#e2457e", path: "#7d7a70", grove: "#3f7a3a", basin: "#5a8fa0", nectar: "#3fae7a",
+  pine: "#2e5a38", bamboo: "#8fb84a", pagoda: "#b8b5ac", festival: "#d8432f",
 };
 
 function restoreIcon(ctx: CanvasRenderingContext2D, key: string): void {

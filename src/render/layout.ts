@@ -103,6 +103,6 @@ export function makeLayout(W: number, H: number): PondLayout {
     waterfall: edge(-1.95, -2),
     gate: edge(-1.2, 18),
     bridge: { x1: cx - rx * 0.62, x2: cx - rx * 0.12, y: cy + ry * 0.05 },
-    deck: { x: Math.round(cx + rx * 0.38), y: Math.round(cy + ry * 0.62), w: Math.round(rx * 0.3), h: 9 },
+    deck: { x: Math.round(cx + rx * 0.34), y: Math.round(cy + ry * 0.56), w: Math.round(rx * 0.34), h: 11 },
   };
 }

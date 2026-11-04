@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { VARIETIES, rollVariety } from "../src/game/data/varieties";
-import { UPGRADES } from "../src/game/data/upgrades";
+import { RESTORE_STAGES, UPGRADES } from "../src/game/data/upgrades";
 import {
   availableUpgrades,
   buyProducer,
@@ -99,11 +99,11 @@ describe("production", () => {
 
   it("orders restoration stages", () => {
     const s = newGame();
-    s.ripples = 1e12;
+    s.ripples = 1e14;
     for (const u of UPGRADES.filter((u) => u.restoreStage).sort((a, b) => a.restoreStage! - b.restoreStage!)) {
       expect(buyUpgrade(s, u.id)).toBe(true);
     }
-    expect(restorationLevel(s)).toBe(12);
+    expect(restorationLevel(s)).toBe(RESTORE_STAGES);
   });
 });
 

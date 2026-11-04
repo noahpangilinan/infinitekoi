@@ -3,7 +3,7 @@ import "./style.css";
 import { debugState } from "./debug";
 import { ACHIEVEMENTS } from "./game/data/achievements";
 import { producer } from "./game/data/producers";
-import { upgrade } from "./game/data/upgrades";
+import { upgrade, UPGRADES } from "./game/data/upgrades";
 import { variety } from "./game/data/varieties";
 import { checkAchievements, click, tick } from "./game/economy";
 import { catchGolden, tickGolden } from "./game/events";
@@ -54,6 +54,11 @@ if (params.has("t")) renderer.phaseOverride = Number(params.get("t"));
 if (debug && params.has("rain")) renderer.rainOverride = Number(params.get("rain"));
 if (debug && params.has("ascend")) renderer.ascensionFreeze = Number(params.get("ascend"));
 if (debug && params.has("theme")) state.theme = params.get("theme")!;
+if (debug && params.has("stages")) {
+  const n = Number(params.get("stages"));
+  state.upgrades = state.upgrades.filter((id) => !upgrade(id)?.restoreStage);
+  state.upgrades.push(...UPGRADES.filter((u) => u.restoreStage && u.restoreStage <= n).map((u) => u.id));
+}
 
 const panel = new Panel(document.getElementById("ui")!, state, {
   bought(id, result) {

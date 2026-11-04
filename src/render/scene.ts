@@ -1,15 +1,19 @@
 import { css, hex, mix, scale, type RGB } from "./color";
 import type { PondLayout } from "./layout";
 import { hash2, mulberry32 } from "./rng";
+import { drawBackMaples, drawBackTrees, drawBambooFence, drawBasin, drawBeds, drawPagoda, drawPath, drawPine, drawScatter, gardenPlan } from "./garden";
 
 // The parts of the pond that only change when you restore something: the sky
 // and garden behind, the ground, and the stone rim. Drawn once into cached
-// canvases. `level` is how many restoration stages are done (0..12).
+// canvases. `done` holds the restoration stages bought, by key ("trash",
+// "garden", ...).
 
 export interface Look {
-  level: number;
+  done: Set<string>;
   theme: string;
 }
+
+const has = (look: Look, stage: string) => look.done.has(stage);
 
 const C = {
   skyGreyTop: hex("#7a8186"),
@@ -43,17 +47,6 @@ const C = {
   plankDark: hex("#6e4a2b"),
   plankLight: hex("#b9875a"),
 };
-
-function canopyColors(theme: string): RGB[][] {
-  switch (theme) {
-    case "autumn":
-      return [[hex("#d8642a"), hex("#b04621"), hex("#f0954a")], [hex("#c93a2a"), hex("#982819"), hex("#e86a4c")], [hex("#d9a03a"), hex("#a8742a"), hex("#f0c35c")]];
-    case "sakura":
-      return [[hex("#f2b3c8"), hex("#d98aa6"), hex("#fbd6e2")], [hex("#eaa0ba"), hex("#cc7896"), hex("#f8c8d8")]];
-    default:
-      return [[hex("#c94a30"), hex("#9c3220"), hex("#e3704f")], [hex("#4f8a3a"), hex("#3a6b2b"), hex("#6fa84e")], [hex("#d06a34"), hex("#a44c22"), hex("#ea9358")]];
-  }
-}
 
 function dot(ctx: CanvasRenderingContext2D, x: number, y: number, c: RGB, a = 1): void {
   ctx.fillStyle = css(c, a);
@@ -116,20 +109,6 @@ function drawHills(ctx: CanvasRenderingContext2D, L: PondLayout, clear: boolean)
   }
 }
 
-function tree(ctx: CanvasRenderingContext2D, x: number, base: number, size: number, colors: RGB[], seed: number): void {
-  const rng = mulberry32(seed);
-  rect(ctx, x - 1, base - size * 0.9, 2, size * 0.9, C.trunk);
-  const blobs = 6 + Math.floor(rng() * 3);
-  for (let i = 0; i < blobs; i++) {
-    const bx = x + (rng() - 0.5) * size * 1.3;
-    const by = base - size * 0.95 + (rng() - 0.5) * size * 0.6;
-    const r = size * (0.35 + rng() * 0.2);
-    ellipse(ctx, bx + 1, by + 1, r, r * 0.8, colors[1]);
-    ellipse(ctx, bx, by, r * 0.9, r * 0.72, colors[0]);
-    ellipse(ctx, bx - r * 0.25, by - r * 0.25, r * 0.4, r * 0.3, colors[2]);
-  }
-}
-
 function bareTree(ctx: CanvasRenderingContext2D, x: number, base: number, size: number, seed: number): void {
   const rng = mulberry32(seed);
   rect(ctx, x, base - size, 1, size, C.trunk);
@@ -142,34 +121,28 @@ function bareTree(ctx: CanvasRenderingContext2D, x: number, base: number, size: 
 }
 
 function drawGarden(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look): void {
-  const rng = mulberry32(21);
-  if (look.level >= 10) {
-    const palettes = canopyColors(look.theme);
-    // A low stone wall, then a row of maples along it.
-    for (let x = 0; x < L.W; x++) {
-      const h = 3;
-      rect(ctx, x, L.horizon - h, 1, h, hash2(x >> 2, 1, 9) < 0.5 ? C.stone : C.stoneDark);
-      if (x % 4 === 0) dot(ctx, x, L.horizon - h, C.stoneLight);
-    }
-    const count = Math.round(L.W / 34);
-    for (let i = 0; i < count; i++) {
-      const x = (i + 0.3 + rng() * 0.4) * (L.W / count);
-      tree(ctx, x, L.horizon + 1, 12 + rng() * 7, palettes[i % palettes.length], 100 + i);
-    }
+  const grove = has(look, "grove");
+  const maples = has(look, "garden");
+  drawBackTrees(ctx, L, grove, maples, look.theme);
+  if (has(look, "fence")) {
+    drawBambooFence(ctx, L);
   } else {
-    // A sagging fence and a few dead trees.
+    // A sagging fence.
     for (let x = 0; x < L.W; x += 9) {
       if (hash2(x, 2, 4) < 0.25) continue;
       const lean = hash2(x, 3, 4) < 0.3 ? 1 : 0;
       rect(ctx, x + lean, L.horizon - 6, 1, 6, C.trunk);
     }
     for (let x = 0; x < L.W; x++) if (hash2(x >> 3, 5, 4) > 0.3) dot(ctx, x, L.horizon - 4 + (x % 9 > 4 ? 1 : 0), C.trunk);
+  }
+  if (!grove) {
+    const rng = mulberry32(21);
     for (let i = 0; i < 3; i++) bareTree(ctx, L.W * (0.15 + i * 0.33 + rng() * 0.1), L.horizon + 1, 12 + rng() * 6, 200 + i);
   }
 }
 
 function drawGround(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look): void {
-  const lush = look.level >= 4;
+  const lush = has(look, "weeds");
   const base = lush ? C.grassLush : C.grassDead;
   const dark = lush ? C.grassLushDark : C.grassDeadDark;
   for (let y = L.horizon; y < L.H; y++) {
@@ -183,7 +156,22 @@ function drawGround(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look): v
       dot(ctx, x, y, c);
     }
   }
-  if (lush && look.level >= 5) {
+  if (lush) {
+    // Tufts of grass blades, more of them nearer the viewer.
+    const rng = mulberry32(17);
+    for (let i = 0; i < L.W * (L.H - L.horizon) * 0.012; i++) {
+      const x = rng() * L.W;
+      const y = L.horizon + 3 + rng() * (L.H - L.horizon - 3);
+      if (L.depth(x, y) > -0.1) continue;
+      const tall = 1 + Math.round(rng() * (1 + (y - L.horizon) / 60));
+      for (let k = 0; k < tall; k++) {
+        dot(ctx, x - 1, y - k, C.grassLushDark);
+        dot(ctx, x + 1, y - k, k === tall - 1 ? C.grassLushLight : C.grassLush);
+      }
+      dot(ctx, x, y - tall, C.grassLushLight);
+    }
+  }
+  if (lush && has(look, "moss")) {
     // Small flowers scattered in the grass.
     const flowers = [hex("#f2e3a0"), hex("#e7a3c0"), hex("#ffffff"), hex("#b7a5e8")];
     const rng = mulberry32(31);
@@ -211,33 +199,25 @@ function drawGravel(ctx: CanvasRenderingContext2D, L: PondLayout): void {
   }
 }
 
-// A small viewing platform reaching out over the front edge of the water,
-// planks running across, with posts and a low rail.
-export function drawDeck(ctx: CanvasRenderingContext2D, L: PondLayout): void {
-  const { x, y, w, h } = L.deck;
-  ellipse(ctx, x + w / 2, y + h + 1, w / 2 + 2, 2, C.soilWet, 0.6); // shadow on the water
-  for (let row = 0; row < h; row++) {
-    const c = row % 3 === 0 ? C.plankDark : row % 3 === 1 ? C.plankLight : C.plank;
-    rect(ctx, x, y + row, w, 1, c);
-  }
-  for (let px = x + 3; px < x + w - 1; px += 7) rect(ctx, px, y + 1, 1, h - 1, C.plankDark, 0.6);
-  rect(ctx, x - 1, y + h, w + 2, 1, C.plankDark);
-  // Posts and rail.
-  for (const px of [x, x + w - 2]) {
-    rect(ctx, px, y - 6, 2, 7, C.plankDark);
-    rect(ctx, px, y + h, 2, 3, C.plankDark);
-  }
-  rect(ctx, x, y - 6, w, 1, C.plankLight);
-  rect(ctx, x, y - 5, w, 1, C.plankDark);
-}
-
 export function drawBackground(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look): void {
-  const clear = look.level >= 9;
+  const clear = has(look, "sky");
   drawSky(ctx, L, clear);
   drawHills(ctx, L, clear);
-  drawGround(ctx, L, look);
   drawGarden(ctx, L, look);
-  if (look.level >= 11) drawGravel(ctx, L);
+  drawGround(ctx, L, look);
+  if (has(look, "gravel")) drawGravel(ctx, L);
+  if (has(look, "path")) drawPath(ctx, L);
+  drawScatter(ctx, L, { moss: has(look, "moss"), flowers: has(look, "flowers"), grove: has(look, "grove"), maples: has(look, "garden") }, look.theme);
+  if (has(look, "flowers")) drawBeds(ctx, L, false, look.theme);
+  if (has(look, "pagoda")) drawPagoda(ctx, gardenPlan(L).pagoda.x, gardenPlan(L).pagoda.y);
+  if (has(look, "garden")) drawBackMaples(ctx, L, look.theme);
+}
+
+// Garden pieces nearer the viewer than the pond's bank, drawn over it.
+export function drawForeground(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look): void {
+  if (has(look, "flowers")) drawBeds(ctx, L, true, look.theme);
+  if (has(look, "basin")) drawBasin(ctx, L);
+  if (has(look, "pine")) drawPine(ctx, gardenPlan(L).pine.x, gardenPlan(L).pine.y, Math.min(46, L.ry * 0.75));
 }
 
 function stone(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, seed: number, moss: boolean, cracked: boolean): void {
@@ -283,8 +263,8 @@ function fern(ctx: CanvasRenderingContext2D, x: number, y: number, seed: number)
 
 // Stones round the water, plus weeds early on and moss and ferns later.
 export function drawRim(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look): void {
-  const tidy = look.level >= 3;
-  const moss = look.level >= 5;
+  const tidy = has(look, "stones");
+  const moss = has(look, "moss");
   const sorted = [...L.stones].sort((a, b) => a.y - b.y);
   for (const s of sorted) {
     const missing = !tidy && hash2(s.seed, 1) < 0.4;
@@ -292,7 +272,7 @@ export function drawRim(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look
     const jitter = tidy ? 0 : (hash2(s.seed, 2) - 0.5) * 3;
     stone(ctx, s.x + jitter, s.y + Math.abs(jitter) * 0.5, s.w, s.h, s.seed, moss, !tidy && hash2(s.seed, 3) < 0.4);
   }
-  if (look.level < 4) {
+  if (!has(look, "weeds")) {
     for (let i = 0; i < 26; i++) {
       const p = L.edge((i / 26) * Math.PI * 2 + 0.1, 6);
       if (hash2(i, 9) < 0.7) weeds(ctx, p.x, p.y, 500 + i);
@@ -307,8 +287,8 @@ export function drawRim(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look
 }
 
 // The fallen stones that lie in the water before the rim is reset.
-export function drawFallenStones(ctx: CanvasRenderingContext2D, L: PondLayout, level: number): void {
-  if (level >= 3) return;
+export function drawFallenStones(ctx: CanvasRenderingContext2D, L: PondLayout, look: Look): void {
+  if (has(look, "stones")) return;
   for (const s of L.stones) {
     if (hash2(s.seed, 1) >= 0.4 || hash2(s.seed, 4) > 0.45) continue;
     const p = L.edge(s.theta, -7 - hash2(s.seed, 5) * 6);

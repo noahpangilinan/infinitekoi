@@ -1,5 +1,5 @@
 import { PRODUCERS } from "./game/data/producers";
-import { UPGRADES } from "./game/data/upgrades";
+import { RESTORE_STAGES, UPGRADES } from "./game/data/upgrades";
 import { VARIETIES } from "./game/data/varieties";
 import { newGame, type GameState } from "./game/state";
 import { mulberry32 } from "./render/rng";
@@ -32,14 +32,14 @@ export function debugState(name: string): GameState | null {
       withProducers(s, [12, 6, 4, 2]);
       break;
     case "restored":
-      restoredTo(s, 12);
+      restoredTo(s, RESTORE_STAGES);
       break;
     case "mid":
-      restoredTo(s, 8);
+      restoredTo(s, 12);
       withProducers(s, [40, 25, 20, 12, 8, 2, 1]);
       break;
     case "late":
-      restoredTo(s, 12);
+      restoredTo(s, RESTORE_STAGES);
       withProducers(s, [100, 80, 60, 40, 30, 4, 4, 1, 1, 1]);
       break;
     default:
