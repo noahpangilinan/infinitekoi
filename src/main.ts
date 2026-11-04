@@ -152,45 +152,68 @@ if (!debug) {
 window.addEventListener("beforeunload", save);
 document.addEventListener("visibilitychange", () => document.hidden && save());
 
-// Fixed-step simulation, drawing every animation frame.
+// The simulation follows the wall clock, so the pond keeps earning while the
+// tab is hidden or the window is unfocused. Browsers pause animation frames
+// in background tabs and slow timers to once a second (or less), so each
+// call catches up on however much real time has passed.
+let simLast = Date.now();
+let simAcc = 0;
+function simulate(): void {
+  const now = Date.now();
+  simAcc += Math.max(0, (now - simLast) / 1000);
+  simLast = now;
+  // Fine steps normally; coarser ones after a long throttled gap.
+  const step = Math.max(STEP, simAcc / 600);
+  while (simAcc >= step) {
+    if (!debug) {
+      tick(state, step);
+      tickGolden(state, step);
+    }
+    simAcc -= step;
+  }
+}
+
+let lastSave = Date.now();
+function housekeeping(): void {
+  const earned = checkAchievements(state);
+  if (earned.length > 3) {
+    toast(`${earned.length} achievements earned`, `+${earned.length}% production. See the Feats tab.`);
+  } else {
+    for (const id of earned) {
+      const a = ACHIEVEMENTS.find((x) => x.id === id)!;
+      toast(`Achievement: ${a.name}`, `${a.desc} +1% production.`);
+    }
+  }
+  if (Date.now() - lastSave > AUTOSAVE * 1000) {
+    save();
+    lastSave = Date.now();
+  }
+}
+
+// In the background: keep simulating and saving without drawing.
+setInterval(() => {
+  if (!document.hidden) return;
+  simulate();
+  housekeeping();
+}, 1000);
+
+// In the foreground: simulate and draw every animation frame.
 let last = performance.now();
-let acc = 0;
 let time = 0;
 let slow = 0;
-let sinceSave = 0;
 function loop(now: number): void {
   const dt = Math.min(0.25, (now - last) / 1000);
   last = now;
-  acc += dt;
-  while (acc >= STEP) {
-    if (!debug) {
-      tick(state, STEP);
-      tickGolden(state, STEP);
-    }
-    acc -= STEP;
-  }
+  simulate();
   time += dt;
   slow += dt;
-  sinceSave += dt;
   renderer.pointer.idle += dt;
   renderer.frame(state, time, dt);
   if (slow > 0.1) {
     panel.update(slow);
     hint.classList.toggle("shown", state.clicks === 0 && !debug);
-    const earned = checkAchievements(state);
-    if (earned.length > 3) {
-      toast(`${earned.length} achievements earned`, `+${earned.length}% production. See the Feats tab.`);
-    } else {
-      for (const id of earned) {
-        const a = ACHIEVEMENTS.find((x) => x.id === id)!;
-        toast(`Achievement: ${a.name}`, `${a.desc} +1% production.`);
-      }
-    }
+    housekeeping();
     slow = 0;
-  }
-  if (sinceSave > AUTOSAVE) {
-    save();
-    sinceSave = 0;
   }
   requestAnimationFrame(loop);
 }
